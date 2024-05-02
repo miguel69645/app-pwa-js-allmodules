@@ -47,10 +47,18 @@ const AddInstituteModal = ({
   async function getDataSelectInstitutesType() {
     try {
       const Labels = await GetAllLabels();
+      console.log("Labels:", Labels); // Registrar la respuesta completa
       const InstitutesTypes = Labels.find(
         (label) => label.IdEtiquetaOK === "IdTipoGiros"
       );
-      setInstitutesValuesLabel(InstitutesTypes.valores);
+      console.log("InstitutesTypes:", InstitutesTypes); // Registrar el resultado de la búsqueda
+      if (InstitutesTypes) {
+        setInstitutesValuesLabel(InstitutesTypes.valores);
+      } else {
+        console.error(
+          "No se encontraron etiquetas para Tipos Giros de Institutos"
+        );
+      }
     } catch (e) {
       console.error(
         "Error al obtener Etiquetas para Tipos Giros de Institutos:",
@@ -58,6 +66,7 @@ const AddInstituteModal = ({
       );
     }
   }
+
   //FIC: Definition Formik y Yup.
   const formik = useFormik({
     initialValues: {
@@ -221,7 +230,7 @@ const AddInstituteModal = ({
               <Checkbox
                 checked={formik.values.Matriz}
                 onChange={formik.handleChange}
-                name="Actual"
+                name="Matriz"
                 color="primary"
                 disabled={!!mensajeExitoAlert}
               />
