@@ -15,6 +15,7 @@ import { deleteInstitute } from "../../services/remote/del/deleteOneInstitute";
 //FIC: Modals
 import AddInstituteModal from "../modals/AddInstituteModal";
 import UpdateInstituteModal from "../modals/UpdateInstituteModal";
+import DetailsInstituteModal from "../modals/DetailsInstituteModal";
 
 //FIC: Table - FrontEnd.
 const InstitutesTable = () => {
@@ -50,6 +51,17 @@ const InstitutesTable = () => {
       );
     }
   };
+  const addInstitutes = async () => {
+    try {
+      const AllInstitutesData = await getAllInstitutes();
+      setInstitutesData(AllInstitutesData);
+    } catch (error) {
+      console.error(
+        "Error al actualizr los institutos en addInstitutes:",
+        error
+      );
+    }
+  };
   //FIC: controlar el estado del indicador (loading).
   const [loadingTable, setLoadingTable] = useState(true);
 
@@ -58,6 +70,8 @@ const InstitutesTable = () => {
   //FIC: controlar el estado que muesta u oculta la modal de nuevo Instituto.
   const [AddInstituteShowModal, setAddInstituteShowModal] = useState(false);
   const [UpdateInstituteShowModal, setUpdateInstituteShowModal] =
+    useState(false);
+  const [DetailsInstituteShowModal, setDetailsInstituteShowModal] =
     useState(false);
   //FIC: controlar el estado del instituteId seleccionado.
   const [selectedInstituteId, setSelectedInstituteId] = useState(null);
@@ -175,7 +189,17 @@ const InstitutesTable = () => {
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Detalles ">
-                    <IconButton>
+                    <IconButton
+                      onClick={() => {
+                        if (selectedInstituteId !== null) {
+                          setDetailsInstituteShowModal(true);
+                        } else {
+                          alert(
+                            "Por favor, selecciona una fila para ver detalles."
+                          );
+                        }
+                      }}
+                    >
                       <InfoIcon />
                     </IconButton>
                   </Tooltip>
@@ -192,6 +216,7 @@ const InstitutesTable = () => {
           AddInstituteShowModal={AddInstituteShowModal}
           setAddInstituteShowModal={setAddInstituteShowModal}
           onClose={() => setAddInstituteShowModal(false)}
+          addInstitutes={addInstitutes}
         />
       </Dialog>
       <Dialog open={UpdateInstituteShowModal}>
@@ -201,6 +226,12 @@ const InstitutesTable = () => {
           onClose={() => setUpdateInstituteShowModal(false)}
           instituteId={selectedInstituteId}
           updateInstitutes={updateInstitutes}
+        />
+      </Dialog>
+      <Dialog open={DetailsInstituteShowModal}>
+        <DetailsInstituteModal
+          instituteId={selectedInstituteId}
+          onClose={() => setDetailsInstituteShowModal(false)}
         />
       </Dialog>
     </Box>

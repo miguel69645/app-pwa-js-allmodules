@@ -30,6 +30,7 @@ import { GetAllLabels } from "../../../labels/services/remote/get/GetAllLabels";
 const AddInstituteModal = ({
   AddInstituteShowModal,
   setAddInstituteShowModal,
+  addInstitutes, 
 }) => {
   const [mensajeErrorAlert, setMensajeErrorAlert] = useState("");
   const [mensajeExitoAlert, setMensajeExitoAlert] = useState("");
@@ -107,6 +108,7 @@ const AddInstituteModal = ({
         console.log("<<Institute>>", Institute);
         await AddOneInstitute(Institute);
         setMensajeExitoAlert("Instituto fue creado y guardado Correctamente");
+        addInstitutes();
       } catch (e) {
         setMensajeExitoAlert(null);
         setMensajeErrorAlert("No se pudo crear el Instituto");
