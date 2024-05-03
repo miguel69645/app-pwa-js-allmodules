@@ -11,10 +11,8 @@ import {
   Alert,
   FormControlLabel,
   Checkbox,
-  InputLabel,
   Select,
   MenuItem,
-  FormHelperText,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import CloseIcon from "@mui/icons-material/Close";
@@ -25,11 +23,14 @@ import * as Yup from "yup";
 //FIC: Helpers
 import { InstituteValues } from "../../helpers/InstituteValues";
 //FIC: Services
-import { AddOneInstitute } from "../../../institutes/services/remote/post/AddOneInstitute";
+import { UpdateOneInstitute } from "../../../institutes/services/remote/put/UpdateOneInstitute";
 import { GetAllLabels } from "../../../labels/services/remote/get/GetAllLabels";
-const AddInstituteModal = ({
-  AddInstituteShowModal,
-  setAddInstituteShowModal,
+import { getOneInstitute } from "../../../institutes/services/remote/get/getOneInstitute";
+const UpdateInstituteModal = ({
+  UpdateInstituteShowModal,
+  setUpdateInstituteShowModal,
+  instituteId,
+  updateInstitutes, 
 }) => {
   const [mensajeErrorAlert, setMensajeErrorAlert] = useState("");
   const [mensajeExitoAlert, setMensajeExitoAlert] = useState("");
@@ -37,9 +38,11 @@ const AddInstituteModal = ({
   const [Loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (instituteId) {
+      getInstituteData();
+    }
     getDataSelectInstitutesType();
-  }, []);
-
+  }, [instituteId]);
   async function getDataSelectInstitutesType() {
     try {
       const Labels = await GetAllLabels();
@@ -60,6 +63,24 @@ const AddInstituteModal = ({
         "Error al obtener Etiquetas para Tipos Giros de Institutos:",
         e
       );
+    }
+  }
+  async function getInstituteData() {
+    console.log("getInstituteData is called");
+    try {
+      const instituteData = await getOneInstitute(instituteId);
+      console.log("Institute Data:", instituteData);
+      formik.setValues({
+        IdInstitutoOK: instituteData.IdInstitutoOK,
+        IdInstitutoBK: instituteData.IdInstitutoBK,
+        DesInstituto: instituteData.DesInstituto,
+        Alias: instituteData.Alias,
+        Matriz: instituteData.Matriz === "S" ? true : false,
+        IdTipoGiroOK: instituteData.IdTipoGiroOK,
+        IdInstitutoSupOK: instituteData.IdInstitutoSupOK,
+      });
+    } catch (e) {
+      console.error("Error al obtener los datos del instituto:", e);
     }
   }
   //FIC: Definition Formik y Yup.
@@ -89,34 +110,28 @@ const AddInstituteModal = ({
       IdInstitutoSupOK: Yup.string(),
     }),
     onSubmit: async (values) => {
-      //FIC: mostramos el Loading.
       setLoading(true);
-      //FIC: notificamos en consola que si se llamo y entro al evento.
       console.log(
         "FIC: entro al onSubmit despues de hacer click en boton Guardar"
       );
-      //FIC: reiniciamos los estados de las alertas de exito y error.
       setMensajeErrorAlert(null);
       setMensajeExitoAlert(null);
       try {
         values.Matriz == true ? (values.Matriz = "S") : (values.Matriz = "N");
-        //FIC: Extraer los datos de los campos de
-        //la ventana modal que ya tiene Formik.
         const Institute = InstituteValues(values);
-        //FIC: mandamos a consola los datos extraidos
         console.log("<<Institute>>", Institute);
-        await AddOneInstitute(Institute);
-        setMensajeExitoAlert("Instituto fue creado y guardado Correctamente");
+        await UpdateOneInstitute(instituteId, Institute);
+        setMensajeExitoAlert(
+          "Instituto fue actualizado y guardado Correctamente"
+        );
+        updateInstitutes(); 
       } catch (e) {
         setMensajeExitoAlert(null);
-        setMensajeErrorAlert("No se pudo crear el Instituto");
+        setMensajeErrorAlert("No se pudo actualizar el Instituto");
       }
-
-      //FIC: ocultamos el Loading.
       setLoading(false);
     },
   });
-  //FIC: props structure for TextField Control.
   const commonTextFieldProps = {
     onChange: formik.handleChange,
     onBlur: formik.handleBlur,
@@ -126,15 +141,15 @@ const AddInstituteModal = ({
   };
   return (
     <Dialog
-      open={AddInstituteShowModal}
-      onClose={() => setAddInstituteShowModal(false)}
+      open={UpdateInstituteShowModal}
+      onClose={() => setUpdateInstituteShowModal(false)}
       fullWidth
     >
       <form onSubmit={formik.handleSubmit}>
         {/* FIC: Aqui va el Titulo de la Modal */}
         <DialogTitle>
           <Typography component="h6">
-            <strong>Agregar Nuevo Instituto</strong>
+            <strong>Actualizar Instituto</strong>
           </Typography>
         </DialogTitle>
         {/* FIC: Aqui va un tipo de control por cada Propiedad de Institutos */}
@@ -146,9 +161,7 @@ const AddInstituteModal = ({
           <TextField
             id="IdInstitutoOK"
             label="IdInstitutoOK*"
-            value={formik.values.IdInstitutoOK}
-            /* onChange={formik.handleChange} */
-            {...commonTextFieldProps}
+            {...formik.getFieldProps("IdInstitutoOK")}
             error={
               formik.touched.IdInstitutoOK &&
               Boolean(formik.errors.IdInstitutoOK)
@@ -160,8 +173,7 @@ const AddInstituteModal = ({
           <TextField
             id="IdInstitutoBK"
             label="IdInstitutoBK*"
-            value={formik.values.IdInstitutoBK}
-            {...commonTextFieldProps}
+            {...formik.getFieldProps("IdInstitutoBK")}
             error={
               formik.touched.IdInstitutoBK &&
               Boolean(formik.errors.IdInstitutoBK)
@@ -173,8 +185,7 @@ const AddInstituteModal = ({
           <TextField
             id="DesInstituto"
             label="DesInstituto*"
-            value={formik.values.DesInstituto}
-            {...commonTextFieldProps}
+            {...formik.getFieldProps("DesInstituto")}
             error={
               formik.touched.DesInstituto && Boolean(formik.errors.DesInstituto)
             }
@@ -185,16 +196,15 @@ const AddInstituteModal = ({
           <TextField
             id="Alias"
             label="Alias*"
-            value={formik.values.Alias}
-            {...commonTextFieldProps}
+            {...formik.getFieldProps("Alias")}
             error={formik.touched.Alias && Boolean(formik.errors.Alias)}
             helperText={formik.touched.Alias && formik.errors.Alias}
           />
           <FormControlLabel
             control={
               <Checkbox
+                {...formik.getFieldProps("Matriz")}
                 checked={formik.values.Matriz}
-                onChange={formik.handleChange}
                 name="Matriz"
                 color="primary"
                 disabled={!!mensajeExitoAlert}
@@ -203,11 +213,9 @@ const AddInstituteModal = ({
             label="Matriz"
           />
           <Select
-            value={formik.values.IdTipoGiroOK}
+            {...formik.getFieldProps("IdTipoGiroOK")}
             label="Selecciona una opción"
-            onChange={formik.handleChange}
-            name="IdTipoGiroOK" //FIC: Asegúrate que coincida con el nombre del campo
-            onBlur={formik.handleBlur}
+            name="IdTipoGiroOK"
             disabled={!!mensajeExitoAlert}
           >
             {InstitutesValuesLabel.map((tipoGiro) => {
@@ -224,8 +232,7 @@ const AddInstituteModal = ({
           <TextField
             id="IdInstitutoSupOK"
             label="IdInstitutoSupOK*"
-            value={formik.values.IdInstitutoSupOK}
-            {...commonTextFieldProps}
+            {...formik.getFieldProps("IdInstitutoSupOK")}
             error={
               formik.touched.IdInstitutoSupOK &&
               Boolean(formik.errors.IdInstitutoSupOK)
@@ -257,7 +264,7 @@ const AddInstituteModal = ({
             loadingPosition="start"
             startIcon={<CloseIcon />}
             variant="outlined"
-            onClick={() => setAddInstituteShowModal(false)}
+            onClick={() => setUpdateInstituteShowModal(false)}
           >
             <span>CERRAR</span>
           </LoadingButton>
@@ -278,4 +285,4 @@ const AddInstituteModal = ({
     </Dialog>
   );
 };
-export default AddInstituteModal;
+export default UpdateInstituteModal;

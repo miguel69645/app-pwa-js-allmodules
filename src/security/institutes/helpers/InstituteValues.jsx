@@ -13,3 +13,4 @@ export const InstituteValues = (values) => {
     (Institute.IdInstitutoSupOK = values.IdInstitutoSupOK);
   return Institute;
 };
+
