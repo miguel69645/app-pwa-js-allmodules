@@ -11,7 +11,7 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
-//FIC: Add
+//FIC: Add hola
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 const pages = ["Productos", "Precios", "Ordenes", "Pagos", "Envios"];
