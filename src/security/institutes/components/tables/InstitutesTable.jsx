@@ -127,3 +127,6 @@ const InstitutesTable = () => {
   );
 };
 export default InstitutesTable;
+
+
+
